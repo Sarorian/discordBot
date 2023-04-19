@@ -3,7 +3,7 @@ require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 const test = require('./test.js');
-const valo = require('./valoCode/valo.js');
+const valo = require('./valo.js');
 const mongoose = require('mongoose');
 const Models = require('./models.js');
 const teamData = Models.teamData;
@@ -83,27 +83,27 @@ client.on('messageCreate', async (message) => {
             const InspiringPotatoStats = playerData.InspiringPotato;
             const MilkdrakeStats = playerData.Milkdrake;
 
-            // Check if data already exists in the database
-            const team = await teamData.findOne({ data });
-            const DrSanic = await DrSanicData.findOne({ DrSanicStats });
-            const Yahu = await YahuData.findOne({ YahuStats });
-            const birdboys = await birdboysData.findOne({ birdboysStats });
-            const InspiringPotato = await InspiringPotatoData.findOne({ InspiringPotatoStats });
-            const Milkdrake = await MilkdrakeData.findOne({ MilkdrakeStats });
-
-            if (team || DrSanic || Yahu || birdboys || InspiringPotato || Milkdrake) {
-                console.log('Data already exists in the database.');
-                return;
+            const matchnumber = data.matchid
+            const existingData = await teamData.findOne({ matchid: matchnumber})
+            if (existingData) {
+                console.log("Data already exists for this match")
+                message.reply({
+                    content: `This match has already been uploaded`
+                });
+            } else {
+                await teamData.create(data);
+                await DrSanicData.create(DrSanicStats);
+                await YahuData.create(YahuStats);
+                await birdboysData.create(birdboysStats);
+                await InspiringPotatoData.create(InspiringPotatoStats);
+                await MilkdrakeData.create(MilkdrakeStats);
+                console.log("Data Sucesfully Uploaded");
+                message.reply({
+                    content: `Data uploaded for your match on ${data.map}`
+                });
             }
-
-            // If data does not exist, insert new data
-            await teamData.create(data);
-            await DrSanicData.create(DrSanicStats);
-            await YahuData.create(YahuStats);
-            await birdboysData.create(birdboysStats);
-            await InspiringPotatoData.create(InspiringPotatoStats);
-            await MilkdrakeData.create(MilkdrakeStats);
-            console.log("Data Sucesfully Uploaded");
+           
+            
         } catch (e) {
             console.log(e);
         }

@@ -13,6 +13,7 @@ const playerData = {
 };
 
 let teamDataSchema = mongoose.Schema({
+        matchid: String,
         win: Boolean,
         attack: { wins: Number, losses: Number },
         defence: { wins: Number, losses: Number },

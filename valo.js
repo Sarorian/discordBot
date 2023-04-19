@@ -127,7 +127,8 @@ async function balanceTeams(players) {
     try {
       //Constructing the returned array
       let teamData = 
-        {win: false,
+        {matchid: "",
+          win: false,
         attack: {
           wins: 0,
           losses: 0
@@ -162,6 +163,7 @@ async function balanceTeams(players) {
         }
       const team = await getTeam(`https://api.henrikdev.xyz/valorant/v2/match/${match}`);
       const { data: { data : { metadata, teams, rounds, players  } }} = await axios(`https://api.henrikdev.xyz/valorant/v2/match/${match}`)
+      teamData.matchid = metadata.matchid;
       //Getting Win Data
       teamData.win = teams[team].has_won;
       //Getting Round Data
