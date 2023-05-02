@@ -37,9 +37,9 @@ async function getTeam(url){
   }
 }
 
-async function getMatchID(playerName, tag) {
+async function getMatchID(id) {
   try {
-      const { data: { data: [game] } } = await axios(`https://api.henrikdev.xyz/valorant/v3/matches/na/${playerName}/${tag}`);
+      const { data: { data: [game] } } = await axios(`https://api.henrikdev.xyz/valorant/v3/by-puuid/matches/na/${id}`);
       const { metadata } = game;
       return metadata.matchid; 
   } catch (e) {
@@ -128,6 +128,7 @@ async function balanceTeams(players) {
       //Constructing the returned array
       let teamData = 
         {matchid: "",
+          gameType: "",
           win: false,
         attack: {
           wins: 0,
@@ -164,6 +165,11 @@ async function balanceTeams(players) {
       const team = await getTeam(`https://api.henrikdev.xyz/valorant/v2/match/${match}`);
       const { data: { data : { metadata, teams, rounds, players  } }} = await axios(`https://api.henrikdev.xyz/valorant/v2/match/${match}`)
       teamData.matchid = metadata.matchid;
+      if (metadata.mode === "Custom Game") {
+        teamData.gameType = "Scrim"
+      } else {
+        teamData.gameType = metadata.mode;
+      }
       //Getting Win Data
       teamData.win = teams[team].has_won;
       //Getting Round Data
@@ -298,7 +304,6 @@ async function balanceTeams(players) {
         acc[cur.name] = {firstBloods: 0,
                         firstDeaths: 0, 
                         agent: "", 
-                        rank: "",
                         kills: 0,
                         deaths: 0,
                         assists: 0,
@@ -334,33 +339,13 @@ async function balanceTeams(players) {
         }
         return acc;
     },playerArr)
-      //Getting Agent Data
     for (const player of playersList) {
       finalData[player.name].agent = players[team].filter(i => player.id === i.puuid)[0].character
-    }
-    //Getting Rank Data
-    for (const player of playersList) {
-      finalData[player.name].rank = players[team].filter(i => player.id === i.puuid)[0].currenttier_patched;
-    }
-    //Getting Kills
-    for (const player of playersList) {
       finalData[player.name].kills = players[team].filter(i => player.id === i.puuid)[0].stats.kills;
-    }
-    //Getting Deaths
-    for (const player of playersList) {
       finalData[player.name].deaths = players[team].filter(i => player.id === i.puuid)[0].stats.deaths;
-    }
-    //Getting Assists
-    for (const player of playersList) {
       finalData[player.name].assists = players[team].filter(i => player.id === i.puuid)[0].stats.assists;
-    }
-    //Getting ACS
-    for (const player of playersList) {
       const acs = players[team].filter(i => player.id === i.puuid)[0].stats.score / metadata.rounds_played;
       finalData[player.name].ACS = Number(acs.toFixed(2));
-    }
-    //Getting ADR (Average Damage per Round)
-    for (const player of playersList) {
       const adr = players[team].filter(i => player.id === i.puuid)[0].damage_made / metadata.rounds_played;
       finalData[player.name].ADR = Number(adr.toFixed(2));
     }
@@ -376,5 +361,6 @@ module.exports = {
     getPlayerData: getPlayerData,
     getKills: getKills,
     balanceTeams: balanceTeams,
-    getMatchID: getMatchID
+    getMatchID: getMatchID,
+    playersList: playersList
 };

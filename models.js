@@ -4,7 +4,6 @@ const playerData = {
     firstBloods: Number,
     firstDeaths: Number,
     agent: String,
-    rank: String,
     kills: Number,
     deaths: Number,
     assists: Number,
@@ -14,6 +13,7 @@ const playerData = {
 
 let teamDataSchema = mongoose.Schema({
         matchid: String,
+        gameType: String,
         win: Boolean,
         attack: { wins: Number, losses: Number },
         defence: { wins: Number, losses: Number },
