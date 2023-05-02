@@ -122,9 +122,19 @@ client.on('messageCreate', async (message) => {
                 return;
             } else {
                 const player = args[1];
-                const agent = args[2] ? ` on ${args[2]}` : '';
+                const agentFinal = args[2] ? ` on ${args[2]}` : '';
+                const agent = args[2];
                 const agentEncoded = encodeURIComponent(args[2] || '');
                 const { data } = await axios.get(`https://bydo.herokuapp.com/players/${player}/${agentEncoded}`);
+                const { data: agentList } = await axios.get("https://valorant-api.com/v1/agents");
+                let imageURL;
+                for (const agentTemp in agentList.data) {
+                    const agentObj = agentList.data[agentTemp];
+                    if (agentObj.displayName === agent) {
+                      imageURL = agentObj.displayIcon;
+                      break;
+                    }
+                }
                 const { length, kills, deaths, assists } = data.reduce((acc, game) => ({
                     length: acc.length + 1,
                     kills: acc.kills + game.kills,
@@ -134,9 +144,12 @@ client.on('messageCreate', async (message) => {
                 const kda = ((kills + assists) / deaths).toFixed(2);
                 message.reply({
                     embeds: [{
+                        thumbnail: {
+                            url: imageURL
+                        },
                         color: 0xff0000,
                         title: 'KDA Stats',
-                        description: `Overall KDA for **${player}**${agent} over ${length} games: ${kda}`,
+                        description: `Overall KDA for **${player}**${agentFinal} over ${length} games: ${kda}`,
                     }]
                 });
             }
@@ -175,6 +188,15 @@ client.on('messageCreate', async (message) => {
                 })
                 return;
             }
+            const { data : mapList } = await axios.get("https://valorant-api.com/v1/maps");
+            let imageURL;
+            for (const mapTemp in mapList.data) {
+                const mapObj = mapList.data[mapTemp];
+                if (mapObj.displayName === map) {
+                  imageURL = mapObj.splash;
+                  break;
+                }
+            }
             const percentageFormatter = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 0 });
             const { wins, attackWins, attackLosses, defenceWins, defenceLosses, length } = data.reduce((acc, game) => ({
                 wins: acc.wins + game.win,
@@ -188,6 +210,9 @@ client.on('messageCreate', async (message) => {
             const defenceWinrate = percentageFormatter.format(defenceWins / (defenceWins + defenceLosses));
             message.reply({
                 embeds: [{
+                    thumbnail: {
+                        url: imageURL
+                    },
                     title: `${map} Stats`,
                     color: 0x00ff00,
                     fields: [
