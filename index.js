@@ -3,7 +3,6 @@ require('dotenv').config();
 const axios = require('axios');
 const { Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-const test = require('./test.js');
 const valo = require('./valo.js');
 const mongoose = require('mongoose');
 const Models = require('./models.js');
